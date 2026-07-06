@@ -1,15 +1,25 @@
 import { Router } from 'express'
+import User from '../models/user'
 
 const router = Router()
 
-// Placeholder handlers for users
-router.get('/', (_req, res) => {
-  res.json([{ id: 'user1', name: 'Alice' }, { id: 'user2', name: 'Bob' }])
+router.get('/', async (_req, res) => {
+  try {
+    const users = await User.find().populate('team')
+    res.json(users)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch users' })
+  }
 })
 
-router.post('/', (_req, res) => {
-  // In future: validate and create user using Mongoose models
-  res.status(201).json({ message: 'User created' })
+router.post('/', async (req, res) => {
+  try {
+    const { name, email, team } = req.body
+    const user = await User.create({ name, email, team })
+    res.status(201).json(user)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create user' })
+  }
 })
 
 export default router
